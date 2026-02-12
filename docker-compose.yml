@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    container_name: compliance-tracker-backend
+    ports:
+      - "5005:5000"
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=sqlite:////app/data/compliance_tracker.db
+      - SECRET_KEY=dev-secret
+      - JWT_SECRET_KEY=jwt-dev-secret
+    volumes:
+      - compliance-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: compliance-tracker-frontend
+    ports:
+      - "6003:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  compliance-data:
