@@ -127,9 +127,10 @@ export default function POAMPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-eaw-font flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font flex items-center gap-2">
             <ClipboardList size={22} className="text-eaw-primary" />
-            Plan of Action &amp; Milestones (POA&amp;M)
+            <span className="hidden sm:inline">Plan of Action &amp; Milestones (POA&amp;M)</span>
+            <span className="sm:hidden">POA&amp;M</span>
           </h1>
           <p className="text-sm text-eaw-muted mt-1">
             {filtered.length} of {items.length} items shown
@@ -137,18 +138,19 @@ export default function POAMPage() {
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <Plus size={16} />
-          Add POA&amp;M
+          <span className="hidden sm:inline">Add POA&amp;M</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Filter Bar */}
       <div className="eaw-card mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Filter size={16} className="text-eaw-muted" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="select-field"
+            className="select-field w-full sm:w-auto"
           >
             <option value="">All Statuses</option>
             {STATUS_OPTIONS.filter(Boolean).map((s) => (
@@ -160,7 +162,7 @@ export default function POAMPage() {
           <select
             value={riskFilter}
             onChange={(e) => setRiskFilter(e.target.value)}
-            className="select-field"
+            className="select-field w-full sm:w-auto"
           >
             <option value="">All Risk Levels</option>
             {RISK_LEVELS.filter(Boolean).map((r) => (
@@ -172,8 +174,8 @@ export default function POAMPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="eaw-section">
+      {/* Desktop Table */}
+      <div className="eaw-section hidden md:block">
         <div className="overflow-x-auto">
           <table className="eaw-table">
             <thead>
@@ -235,6 +237,55 @@ export default function POAMPage() {
         </div>
       </div>
 
+      {/* Mobile Card List */}
+      <div className="md:hidden mobile-card-table">
+        {filtered.length === 0 ? (
+          <div className="text-center text-eaw-muted py-8">
+            No POA&amp;M items found.
+          </div>
+        ) : (
+          filtered.map((item) => (
+            <div key={item.id} className="mobile-card-row">
+              <div className="font-medium text-eaw-link mb-1">
+                {item.control_number ?? '--'}
+              </div>
+              <div className="text-sm text-eaw-font mb-2">
+                {item.weakness_description}
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {riskBadge(item.risk_level)}
+                {poamStatusBadge(item.status)}
+              </div>
+              {item.remediation_plan && (
+                <div className="text-xs text-eaw-muted mb-2 line-clamp-2">
+                  {item.remediation_plan}
+                </div>
+              )}
+              <div className="flex flex-wrap gap-3 text-xs text-eaw-muted">
+                {item.responsible_person && (
+                  <span>Owner: {item.responsible_person}</span>
+                )}
+                {item.planned_completion_date && (
+                  <span>Due: {item.planned_completion_date}</span>
+                )}
+              </div>
+              <div className="mt-2">
+                <select
+                  value={item.status}
+                  onChange={(e) => handleStatusChange(item, e.target.value)}
+                  className="select-field text-xs w-full"
+                >
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="accepted_risk">Accepted Risk</option>
+                </select>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -251,7 +302,7 @@ export default function POAMPage() {
                 <X size={18} />
               </button>
             </div>
-            <div className="px-5 py-4 space-y-3">
+            <div className="px-5 py-4 space-y-3 max-h-[70vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-eaw-font mb-1">
                   Control

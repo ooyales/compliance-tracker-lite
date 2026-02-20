@@ -111,7 +111,7 @@ export default function EvidencePage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-eaw-font flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font flex items-center gap-2">
             <FileText size={22} className="text-eaw-primary" />
             Evidence Artifacts
           </h1>
@@ -121,18 +121,19 @@ export default function EvidencePage() {
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <Plus size={16} />
-          Add Evidence
+          <span className="hidden sm:inline">Add Evidence</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Filter */}
       <div className="eaw-card mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Filter size={16} className="text-eaw-muted" />
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="select-field"
+            className="select-field w-full sm:w-auto"
           >
             <option value="">All Types</option>
             {EVIDENCE_TYPES.filter(Boolean).map((t) => (
@@ -144,8 +145,8 @@ export default function EvidencePage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="eaw-section">
+      {/* Desktop Table */}
+      <div className="eaw-section hidden md:block">
         <div className="overflow-x-auto">
           <table className="eaw-table">
             <thead>
@@ -220,6 +221,59 @@ export default function EvidencePage() {
         </div>
       </div>
 
+      {/* Mobile Card List */}
+      <div className="md:hidden mobile-card-table">
+        {filtered.length === 0 ? (
+          <div className="text-center text-eaw-muted py-8">
+            No evidence found.
+          </div>
+        ) : (
+          filtered.map((e) => (
+            <div key={e.id} className="mobile-card-row">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="font-medium text-eaw-font">{e.title}</div>
+                <button
+                  onClick={() => handleDelete(e.id)}
+                  className="text-eaw-muted hover:text-eaw-danger transition-colors shrink-0 p-1"
+                  title="Delete"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <span className="badge-info">{e.evidence_type}</span>
+                {e.control_number && (
+                  <span className="text-xs text-eaw-link">{e.control_number}</span>
+                )}
+              </div>
+              {e.description && (
+                <div className="text-xs text-eaw-muted mb-2 line-clamp-2">
+                  {e.description}
+                </div>
+              )}
+              <div className="flex items-center justify-between text-xs text-eaw-muted">
+                <span>
+                  {e.uploaded_at
+                    ? new Date(e.uploaded_at).toLocaleDateString()
+                    : '--'}
+                </span>
+                {e.external_url && (
+                  <a
+                    href={e.external_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-eaw-link hover:text-eaw-link-hover"
+                  >
+                    <ExternalLink size={12} />
+                    Link
+                  </a>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -236,7 +290,7 @@ export default function EvidencePage() {
                 <X size={18} />
               </button>
             </div>
-            <div className="px-5 py-4 space-y-3">
+            <div className="px-5 py-4 space-y-3 max-h-[70vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-eaw-font mb-1">
                   Control
@@ -254,7 +308,7 @@ export default function EvidencePage() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-eaw-font mb-1">
                     Evidence Type

@@ -82,7 +82,7 @@ export default function ControlListPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-eaw-font flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font flex items-center gap-2">
             <Shield size={22} className="text-eaw-primary" />
             NIST 800-171 Controls
           </h1>
@@ -99,7 +99,7 @@ export default function ControlListPage() {
           <select
             value={familyFilter}
             onChange={(e) => setFamilyFilter(e.target.value)}
-            className="select-field"
+            className="select-field w-full sm:w-auto"
           >
             <option value="">All Families</option>
             {families.map((f) => (
@@ -112,7 +112,7 @@ export default function ControlListPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="select-field"
+            className="select-field w-full sm:w-auto"
           >
             {STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -121,7 +121,7 @@ export default function ControlListPage() {
             ))}
           </select>
 
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
             <Search
               size={16}
               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-eaw-muted"
@@ -130,15 +130,15 @@ export default function ControlListPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-8"
+              className="w-full py-2 pr-3 pl-9 text-sm border border-eaw-border rounded outline-none transition-colors focus:border-eaw-primary focus:ring-1 focus:ring-eaw-primary"
               placeholder="Search by control # or title..."
             />
           </div>
         </div>
       </div>
 
-      {/* Controls Table */}
-      <div className="eaw-section">
+      {/* Desktop Controls Table */}
+      <div className="eaw-section hidden md:block">
         <div className="overflow-x-auto">
           <table className="eaw-table">
             <thead>
@@ -183,6 +183,36 @@ export default function ControlListPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card List */}
+      <div className="md:hidden mobile-card-table">
+        {filtered.length === 0 ? (
+          <div className="text-center text-eaw-muted py-8">
+            No controls found matching filters.
+          </div>
+        ) : (
+          filtered.map((c) => (
+            <div
+              key={c.id}
+              className="mobile-card-row clickable"
+              onClick={() => navigate(`/controls/${c.id}`)}
+            >
+              <div className="font-medium text-eaw-link mb-1">
+                {c.control_number}
+              </div>
+              <div className="text-sm text-eaw-font mb-2">{c.title}</div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                <span className="badge-info">{c.family_code ?? '--'}</span>
+                {typeBadge(c.control_type)}
+                {statusBadge(c.implementation_status)}
+              </div>
+              <div className="text-xs text-eaw-muted">
+                Weight: {c.weight}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

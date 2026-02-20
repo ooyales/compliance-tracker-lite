@@ -112,7 +112,7 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-eaw-font">
+        <h1 className="text-lg md:text-xl font-bold text-eaw-font">
           CMMC Compliance Dashboard
         </h1>
         <p className="text-sm text-eaw-muted mt-1">
@@ -321,7 +321,7 @@ export default function DashboardPage() {
             <span>POA&amp;M by Risk Level</span>
           </div>
           <div className="eaw-section-content">
-            <div className="flex gap-4 mb-4 text-sm">
+            <div className="flex flex-wrap gap-4 mb-4 text-sm">
               <div>
                 <span className="text-eaw-muted">Total: </span>
                 <span className="font-semibold">

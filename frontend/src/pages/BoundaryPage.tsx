@@ -104,7 +104,7 @@ export default function BoundaryPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-eaw-font flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font flex items-center gap-2">
             <Lock size={22} className="text-eaw-primary" />
             Authorization Boundary
           </h1>
@@ -114,13 +114,14 @@ export default function BoundaryPage() {
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <Plus size={16} />
-          Add Asset
+          <span className="hidden sm:inline">Add Asset</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 
       {/* Summary Card */}
       <div className="eaw-card mb-4">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2">
             <span className="badge-danger text-sm px-3 py-1">CUI</span>
             <span className="text-sm font-semibold text-eaw-font">
@@ -136,8 +137,8 @@ export default function BoundaryPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="eaw-section">
+      {/* Desktop Table */}
+      <div className="eaw-section hidden md:block">
         <div className="overflow-x-auto">
           <table className="eaw-table">
             <thead>
@@ -208,6 +209,54 @@ export default function BoundaryPage() {
         </div>
       </div>
 
+      {/* Mobile Card List */}
+      <div className="md:hidden mobile-card-table">
+        {assets.length === 0 ? (
+          <div className="text-center text-eaw-muted py-8">
+            No boundary assets defined.
+          </div>
+        ) : (
+          assets.map((a) => (
+            <div key={a.id} className="mobile-card-row">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="font-medium text-eaw-font">
+                  {a.asset_name ?? '--'}
+                </div>
+                <button
+                  onClick={() => toggleScope(a)}
+                  className="shrink-0 p-1"
+                  title={
+                    a.in_scope === 1
+                      ? 'Click to remove from scope'
+                      : 'Click to add to scope'
+                  }
+                >
+                  {a.in_scope === 1 ? (
+                    <ToggleRight size={24} className="text-eaw-success" />
+                  ) : (
+                    <ToggleLeft size={24} className="text-eaw-muted" />
+                  )}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {classificationBadge(a.data_classification)}
+                {a.asset_type && (
+                  <span className="badge-info">{a.asset_type}</span>
+                )}
+              </div>
+              <div className="text-xs text-eaw-muted">
+                {a.boundary_name && (
+                  <div>Boundary: {a.boundary_name}</div>
+                )}
+                {a.notes && (
+                  <div className="mt-1 line-clamp-2">{a.notes}</div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -224,7 +273,7 @@ export default function BoundaryPage() {
                 <X size={18} />
               </button>
             </div>
-            <div className="px-5 py-4 space-y-3">
+            <div className="px-5 py-4 space-y-3 max-h-[70vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-medium text-eaw-font mb-1">
                   Asset Name

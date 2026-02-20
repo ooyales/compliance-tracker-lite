@@ -164,8 +164,8 @@ export default function ControlDetailPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+        <div className="min-w-0 flex-1">
           <button
             onClick={() => navigate('/controls')}
             className="flex items-center gap-1 text-sm text-eaw-link hover:text-eaw-link-hover mb-2"
@@ -173,10 +173,10 @@ export default function ControlDetailPage() {
             <ArrowLeft size={14} />
             Back to Controls
           </button>
-          <h1 className="text-xl font-bold text-eaw-font">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font">
             {control.control_number}: {control.title}
           </h1>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             {control.family_code && (
               <span className="badge-info">{control.family_code}</span>
             )}
@@ -191,7 +191,7 @@ export default function ControlDetailPage() {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={implStatus}
             onChange={(e) => setImplStatus(e.target.value)}
@@ -260,7 +260,7 @@ export default function ControlDetailPage() {
                 onClick={() => handleObjectiveToggle(obj)}
               >
                 {objStatusIcon(obj.status)}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-eaw-font">
                     {obj.objective_number}
                   </div>
@@ -329,7 +329,7 @@ export default function ControlDetailPage() {
             {control.evidence.map((ev) => (
               <div
                 key={ev.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded border border-eaw-border-light"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded border border-eaw-border-light gap-2"
               >
                 <div>
                   <div className="text-sm font-medium text-eaw-font">
@@ -377,7 +377,7 @@ export default function ControlDetailPage() {
             {control.poam_items.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded border border-eaw-border-light"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-gray-50 rounded border border-eaw-border-light gap-2"
               >
                 <div>
                   <div className="text-sm font-medium text-eaw-font">

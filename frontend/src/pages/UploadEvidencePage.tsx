@@ -78,9 +78,9 @@ export default function UploadEvidencePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-xl font-bold text-eaw-font flex items-center gap-2">
+          <h1 className="text-lg md:text-xl font-bold text-eaw-font flex items-center gap-2">
             <Upload size={22} className="text-eaw-primary" />
             Upload Evidence
           </h1>
@@ -90,22 +90,26 @@ export default function UploadEvidencePage() {
         </div>
         <button className="btn-secondary flex items-center gap-2" onClick={downloadTemplate}>
           <Download size={16} />
-          Download Template
+          <span className="hidden sm:inline">Download Template</span>
+          <span className="sm:hidden">Template</span>
         </button>
       </div>
 
       {/* Template info */}
       <div className="eaw-section mb-4">
         <div className="eaw-section-header">
-          <FileText size={16} className="text-eaw-primary" />
-          <span>CSV Format</span>
+          <div className="flex items-center gap-2">
+            <FileText size={16} className="text-eaw-primary" />
+            <span>CSV Format</span>
+          </div>
         </div>
         <div className="eaw-section-content">
           <p className="text-sm text-eaw-muted mb-3">
             Your CSV file should contain these columns. The <strong>control_number</strong> must match
             an existing NIST 800-171 control (e.g. 3.1.1, 3.5.3).
           </p>
-          <div className="overflow-x-auto">
+          {/* Desktop format table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="eaw-table text-xs">
               <thead>
                 <tr>
@@ -124,6 +128,21 @@ export default function UploadEvidencePage() {
               </tbody>
             </table>
           </div>
+          {/* Mobile format cards */}
+          <div className="md:hidden space-y-2">
+            {[
+              { col: 'control_number', req: 'Yes', desc: 'NIST control number', ex: '3.1.1' },
+              { col: 'evidence_type', req: 'No', desc: 'policy, screenshot, config, etc.', ex: 'policy' },
+              { col: 'title', req: 'Yes', desc: 'Brief title', ex: 'Access Control Policy v2.1' },
+              { col: 'description', req: 'No', desc: 'Detailed description', ex: 'Corporate access control policy' },
+              { col: 'external_url', req: 'No', desc: 'Link to evidence artifact', ex: 'https://...' },
+            ].map((r) => (
+              <div key={r.col} className="p-2 bg-gray-50 rounded border border-eaw-border-light text-xs">
+                <div className="font-medium text-eaw-font">{r.col} {r.req === 'Yes' && <span className="text-eaw-danger">*</span>}</div>
+                <div className="text-eaw-muted">{r.desc}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -133,7 +152,7 @@ export default function UploadEvidencePage() {
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onClick={() => fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-colors mb-4 ${
+        className={`border-2 border-dashed rounded-lg p-6 md:p-10 text-center cursor-pointer transition-colors mb-4 ${
           dragOver
             ? 'border-eaw-primary bg-blue-50'
             : file
@@ -185,7 +204,8 @@ export default function UploadEvidencePage() {
           <div className="eaw-section-header">
             <span>Preview ({rows.length} row{rows.length !== 1 ? 's' : ''})</span>
           </div>
-          <div className="eaw-section-content overflow-x-auto">
+          {/* Desktop preview table */}
+          <div className="eaw-section-content hidden md:block overflow-x-auto">
             <table className="eaw-table text-sm">
               <thead>
                 <tr>
@@ -213,6 +233,25 @@ export default function UploadEvidencePage() {
                 )}
               </tbody>
             </table>
+          </div>
+          {/* Mobile preview cards */}
+          <div className="eaw-section-content md:hidden mobile-card-table">
+            {rows.slice(0, 10).map((row, ri) => (
+              <div key={ri} className="mobile-card-row">
+                <div className="text-xs text-eaw-muted mb-1">Row {ri + 1}</div>
+                {headers.map((h, ci) => (
+                  <div key={ci} className="text-xs">
+                    <span className="font-medium text-eaw-font">{h}:</span>{' '}
+                    <span className="text-eaw-muted">{row[ci] || '--'}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+            {rows.length > 10 && (
+              <div className="text-center text-eaw-muted text-xs py-2">
+                ...and {rows.length - 10} more rows
+              </div>
+            )}
           </div>
         </div>
       )}

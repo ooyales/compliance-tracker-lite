@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -51,33 +50,53 @@ const sections: SidebarSection[] = [
   },
 ];
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+  isMobile?: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+export default function Sidebar({
+  collapsed,
+  onToggle,
+  isMobile = false,
+  mobileOpen = false,
+  onMobileClose,
+}: SidebarProps) {
+  const showLabels = isMobile || !collapsed;
 
   return (
     <aside
-      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-eaw-border transition-all duration-200 z-40 overflow-y-auto ${
-        collapsed ? 'w-12' : 'w-56'
+      className={`fixed top-14 left-0 bottom-0 bg-white border-r border-eaw-border z-40 overflow-y-auto transition-all duration-200 ${
+        isMobile
+          ? `w-56 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`
+          : collapsed
+          ? 'w-12'
+          : 'w-56'
       }`}
     >
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center gap-2 px-3 py-3 text-xs font-semibold text-eaw-muted uppercase tracking-wider hover:bg-gray-50 border-b border-eaw-border-light"
-      >
-        {collapsed ? (
-          <ChevronRight size={16} className="mx-auto" />
-        ) : (
-          <>
-            <ChevronLeft size={16} />
-            <span>Navigation</span>
-          </>
-        )}
-      </button>
+      {/* Collapse toggle — hidden on mobile */}
+      {!isMobile && (
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center gap-2 px-3 py-3 text-xs font-semibold text-eaw-muted uppercase tracking-wider hover:bg-gray-50 border-b border-eaw-border-light"
+        >
+          {collapsed ? (
+            <ChevronRight size={16} className="mx-auto" />
+          ) : (
+            <>
+              <ChevronLeft size={16} />
+              <span>Navigation</span>
+            </>
+          )}
+        </button>
+      )}
 
       {sections.map((section) => (
         <div key={section.title}>
-          {!collapsed && (
+          {showLabels && (
             <div className="px-3 pt-4 pb-1 text-[10px] font-semibold text-eaw-muted uppercase tracking-widest">
               {section.title}
             </div>
@@ -87,19 +106,22 @@ export default function Sidebar() {
               key={item.path + item.label}
               to={item.path}
               end={item.path === '/'}
+              onClick={() => {
+                if (isMobile && onMobileClose) onMobileClose();
+              }}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                  collapsed ? 'justify-center' : ''
+                `flex items-center gap-2.5 px-3 py-2 min-h-[44px] text-sm transition-colors ${
+                  !showLabels ? 'justify-center' : ''
                 } ${
                   isActive
                     ? 'bg-eaw-primary text-white'
                     : 'text-eaw-font hover:bg-gray-50'
                 }`
               }
-              title={collapsed ? item.label : undefined}
+              title={!showLabels ? item.label : undefined}
             >
               {item.icon}
-              {!collapsed && <span>{item.label}</span>}
+              {showLabels && <span>{item.label}</span>}
             </NavLink>
           ))}
         </div>
