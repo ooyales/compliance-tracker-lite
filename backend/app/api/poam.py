@@ -10,6 +10,44 @@ poam_bp = Blueprint('poam', __name__)
 
 @poam_bp.route('', methods=['GET'])
 def list_poam():
+    """List all POA&M items with optional filters.
+    ---
+    tags:
+      - POA&M
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: status
+        in: query
+        type: string
+        required: false
+        enum: [open, in_progress, completed, cancelled]
+        description: Filter by POA&M status
+      - name: risk_level
+        in: query
+        type: string
+        required: false
+        enum: [critical, high, moderate, low]
+        description: Filter by risk level
+    responses:
+      200:
+        description: List of POA&M items enriched with control info
+        schema:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/definitions/POAMItem'
+              - type: object
+                properties:
+                  control_number:
+                    type: string
+                  control_title:
+                    type: string
+    """
     session_id = request.args.get('session_id', '__default__')
     status = request.args.get('status')
     risk_level = request.args.get('risk_level')
@@ -37,6 +75,75 @@ def list_poam():
 
 @poam_bp.route('', methods=['POST'])
 def create_poam():
+    """Create a new POA&M item linked to a control.
+    ---
+    tags:
+      - POA&M
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - control_id
+          properties:
+            control_id:
+              type: string
+              description: UUID of the linked control
+            weakness_description:
+              type: string
+            remediation_plan:
+              type: string
+            risk_level:
+              type: string
+              enum: [critical, high, moderate, low]
+              default: moderate
+            responsible_person:
+              type: string
+            responsible_team:
+              type: string
+            planned_start_date:
+              type: string
+              description: ISO date string
+            planned_completion_date:
+              type: string
+              description: ISO date string
+            actual_completion_date:
+              type: string
+              description: ISO date string
+            estimated_cost:
+              type: number
+            cost_notes:
+              type: string
+            status:
+              type: string
+              enum: [open, in_progress, completed, cancelled]
+              default: open
+            milestones:
+              type: string
+              description: JSON string of milestones array
+              default: "[]"
+    responses:
+      201:
+        description: POA&M item created
+        schema:
+          $ref: '#/definitions/POAMItem'
+      400:
+        description: Missing request body or control_id
+        schema:
+          $ref: '#/definitions/Error'
+      404:
+        description: Linked control not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     session_id = request.args.get('session_id', '__default__')
     data = request.get_json()
 
@@ -83,6 +190,68 @@ def create_poam():
 
 @poam_bp.route('/<poam_id>', methods=['PUT'])
 def update_poam(poam_id):
+    """Update an existing POA&M item.
+    ---
+    tags:
+      - POA&M
+    parameters:
+      - name: poam_id
+        in: path
+        type: string
+        required: true
+        description: POA&M item UUID
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            weakness_description:
+              type: string
+            remediation_plan:
+              type: string
+            risk_level:
+              type: string
+              enum: [critical, high, moderate, low]
+            responsible_person:
+              type: string
+            responsible_team:
+              type: string
+            planned_start_date:
+              type: string
+            planned_completion_date:
+              type: string
+            actual_completion_date:
+              type: string
+            estimated_cost:
+              type: number
+            cost_notes:
+              type: string
+            status:
+              type: string
+              enum: [open, in_progress, completed, cancelled]
+            milestones:
+              type: string
+    responses:
+      200:
+        description: Updated POA&M item
+        schema:
+          $ref: '#/definitions/POAMItem'
+      400:
+        description: Missing request body
+        schema:
+          $ref: '#/definitions/Error'
+      404:
+        description: POA&M item not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     session_id = request.args.get('session_id', '__default__')
     item = POAMItem.query.filter_by(
         id=poam_id, session_id=session_id
@@ -114,6 +283,36 @@ def update_poam(poam_id):
 
 @poam_bp.route('/<poam_id>', methods=['DELETE'])
 def delete_poam(poam_id):
+    """Delete a POA&M item.
+    ---
+    tags:
+      - POA&M
+    parameters:
+      - name: poam_id
+        in: path
+        type: string
+        required: true
+        description: POA&M item UUID
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+    responses:
+      200:
+        description: POA&M item deleted
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: POA&M item deleted
+      404:
+        description: POA&M item not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     session_id = request.args.get('session_id', '__default__')
     item = POAMItem.query.filter_by(
         id=poam_id, session_id=session_id

@@ -36,6 +36,92 @@ RISK_COLORS = {
 
 @dashboard_bp.route('', methods=['GET'])
 def get_dashboard():
+    """Get compliance dashboard with SPRS score, control breakdown, POA&M summary, and boundary count.
+    ---
+    tags:
+      - Dashboard
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+    responses:
+      200:
+        description: Dashboard summary data
+        schema:
+          type: object
+          properties:
+            sprs_score:
+              type: integer
+              description: Calculated SPRS score (-203 to 110)
+            total_controls:
+              type: integer
+            assessed_controls:
+              type: integer
+            implementation_breakdown:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: integer
+                  color:
+                    type: string
+            family_heatmap:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  code:
+                    type: string
+                  total:
+                    type: integer
+                  implemented:
+                    type: integer
+                  percentage:
+                    type: integer
+                  color:
+                    type: string
+            poam_summary:
+              type: object
+              properties:
+                total:
+                  type: integer
+                open:
+                  type: integer
+                in_progress:
+                  type: integer
+                overdue:
+                  type: integer
+                by_risk:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: integer
+                      color:
+                        type: string
+            boundary_count:
+              type: integer
+            score_trend:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: integer
+    """
     session_id = request.args.get('session_id', '__default__')
 
     controls = Control.query.filter_by(session_id=session_id).all()

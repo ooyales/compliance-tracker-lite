@@ -10,6 +10,37 @@ evidence_bp = Blueprint('evidence', __name__)
 
 @evidence_bp.route('', methods=['GET'])
 def list_evidence():
+    """List all evidence items with optional control filter.
+    ---
+    tags:
+      - Evidence
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: control_id
+        in: query
+        type: string
+        required: false
+        description: Filter by control UUID
+    responses:
+      200:
+        description: List of evidence items enriched with control info
+        schema:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/definitions/Evidence'
+              - type: object
+                properties:
+                  control_number:
+                    type: string
+                  control_title:
+                    type: string
+    """
     session_id = request.args.get('session_id', '__default__')
     control_id = request.args.get('control_id')
 
@@ -35,6 +66,58 @@ def list_evidence():
 
 @evidence_bp.route('', methods=['POST'])
 def create_evidence():
+    """Create a new evidence item linked to a control.
+    ---
+    tags:
+      - Evidence
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - control_id
+            - title
+          properties:
+            control_id:
+              type: string
+              description: UUID of the linked control
+            title:
+              type: string
+            evidence_type:
+              type: string
+              default: document
+              description: "Type: document, policy, screenshot, log, audit_report, etc."
+            description:
+              type: string
+            file_path:
+              type: string
+            external_url:
+              type: string
+            uploaded_by:
+              type: string
+              default: admin
+    responses:
+      201:
+        description: Evidence created
+        schema:
+          $ref: '#/definitions/Evidence'
+      400:
+        description: Missing required fields
+        schema:
+          $ref: '#/definitions/Error'
+      404:
+        description: Linked control not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     session_id = request.args.get('session_id', '__default__')
     data = request.get_json()
 
@@ -74,7 +157,19 @@ def create_evidence():
 
 @evidence_bp.route('/template', methods=['GET'])
 def evidence_template():
-    """Return a CSV template for bulk evidence upload."""
+    """Download a CSV template for bulk evidence upload.
+    ---
+    tags:
+      - Evidence
+    security: []
+    responses:
+      200:
+        description: CSV template file
+        schema:
+          type: file
+    produces:
+      - text/csv
+    """
     import io
     import csv
     from flask import Response
@@ -103,7 +198,67 @@ def evidence_template():
 
 @evidence_bp.route('/bulk', methods=['POST'])
 def bulk_upload_evidence():
-    """Accept CSV file or JSON array for bulk evidence creation."""
+    """Bulk-create evidence from a CSV file or JSON array.
+    ---
+    tags:
+      - Evidence
+    parameters:
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+      - name: body
+        in: body
+        required: false
+        description: JSON array of evidence items (alternative to CSV file upload)
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              control_number:
+                type: string
+              evidence_type:
+                type: string
+              title:
+                type: string
+              description:
+                type: string
+              external_url:
+                type: string
+    consumes:
+      - application/json
+      - multipart/form-data
+      - text/csv
+    responses:
+      201:
+        description: Bulk upload results
+        schema:
+          type: object
+          properties:
+            created:
+              type: integer
+              description: Number of successfully created items
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  row:
+                    type: integer
+                  message:
+                    type: string
+            items:
+              type: array
+              items:
+                $ref: '#/definitions/Evidence'
+      400:
+        description: Invalid input format
+        schema:
+          $ref: '#/definitions/Error'
+    """
     import csv
     import io
 
@@ -174,6 +329,36 @@ def bulk_upload_evidence():
 
 @evidence_bp.route('/<evidence_id>', methods=['DELETE'])
 def delete_evidence(evidence_id):
+    """Delete an evidence item.
+    ---
+    tags:
+      - Evidence
+    parameters:
+      - name: evidence_id
+        in: path
+        type: string
+        required: true
+        description: Evidence UUID
+      - name: session_id
+        in: query
+        type: string
+        required: false
+        default: __default__
+        description: Session ID for demo isolation
+    responses:
+      200:
+        description: Evidence deleted
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Evidence deleted
+      404:
+        description: Evidence not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     session_id = request.args.get('session_id', '__default__')
     evidence = Evidence.query.filter_by(
         id=evidence_id, session_id=session_id

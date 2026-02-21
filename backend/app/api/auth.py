@@ -27,6 +27,61 @@ DEMO_USERS = {
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """Authenticate and get a JWT token.
+    ---
+    tags:
+      - Auth
+    security: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+              example: admin
+            password:
+              type: string
+              example: admin123
+    responses:
+      200:
+        description: Login successful
+        schema:
+          type: object
+          properties:
+            token:
+              type: string
+              description: JWT access token
+            access_token:
+              type: string
+              description: JWT access token (alias)
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                username:
+                  type: string
+                role:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+      400:
+        description: Missing request body
+        schema:
+          $ref: '#/definitions/Error'
+      401:
+        description: Invalid credentials
+        schema:
+          $ref: '#/definitions/Error'
+    """
     data = request.get_json()
     if not data:
         return jsonify({'message': 'Missing request body'}), 400
@@ -62,6 +117,31 @@ def login():
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def me():
+    """Get current authenticated user profile.
+    ---
+    tags:
+      - Auth
+    responses:
+      200:
+        description: Current user profile
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+            role:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+      404:
+        description: User not found
+        schema:
+          $ref: '#/definitions/Error'
+    """
     current_user_id = get_jwt_identity()
 
     for user in DEMO_USERS.values():
